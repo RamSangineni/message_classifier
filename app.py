@@ -5,15 +5,28 @@ import nltk
 from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
+import requests
+from io import BytesIO
 
-# Load the trained model
-with open(r"C:\Users\Prashanth.Veeragoni\OneDrive - TANLA PLATFORMS LIMITED\Documents\project_prashanth\Bernouli_Model.pkl", 'rb') as file:
-    model = pickle.load(file)
+# Download the model and vectorizer files from GitHub
+model_url = "https://github.com/RamSangineni/message_classifier/blob/main/Bernouli_Model.pkl"
+vectorizer_url = "https://github.com/RamSangineni/message_classifier/blob/main/TFIDF_vectorizer.pkl"
 
-# Load TF-IDF
-with open(r"C:\Users\Prashanth.Veeragoni\OneDrive - TANLA PLATFORMS LIMITED\Documents\project_prashanth\TFIDF_vectorizer.pkl", 'rb') as file:
-    tfidf = pickle.load(file)
+model_response = requests.get(model_url)
+vectorizer_response = requests.get(vectorizer_url)
 
+# Check if download is successful
+if model_response.status_code == 200 and vectorizer_response.status_code == 200:
+    model_data = BytesIO(model_response.content)
+    vectorizer_data = BytesIO(vectorizer_response.content)
+
+    # Load the trained model
+    model = pickle.load(model_data)
+
+    # Load TF-IDF
+    tfidf = pickle.load(vectorizer_data)
+else:
+    st.error("Failed to download model and vectorizer files. Please check the URLs.")
 
 # Function to remove special characters and punctuation
 def cleaning_text(text):
